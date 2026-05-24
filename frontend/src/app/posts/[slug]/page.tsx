@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -30,17 +31,24 @@ function slugifyHeading(s: string): string {
   return s.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-{2,}/g, "-").replace(/^-|-$/g, "");
 }
 
-async function fetchPost(slug: string): Promise<PostDetail | null> {
+async function fetchPost(slug: string, token: string | null): Promise<PostDetail | null> {
   try {
-    return await api<PostDetail>(`/api/posts/${encodeURIComponent(slug)}`);
+    return await api<PostDetail>(`/api/posts/${encodeURIComponent(slug)}`, { token });
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) return null;
     throw err;
   }
 }
 
+function authTokenFromCookies(): string | null {
+  // Read the lv_auth cookie set by client-side login. Lets server components
+  // forward the user's JWT to the API so admins/owners can SSR Hidden/Pending
+  // posts that would otherwise 404 to anonymous callers.
+  return cookies().get("lv_auth")?.value ?? null;
+}
+
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const post = await fetchPost(params.slug);
+  const post = await fetchPost(params.slug, authTokenFromCookies());
   if (!post) return { title: "Not found" };
   return {
     title: post.title,
@@ -57,7 +65,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function PostPage({ params }: { params: { slug: string } }) {
-  const post = await fetchPost(params.slug);
+  const post = await fetchPost(params.slug, authTokenFromCookies());
   if (!post) notFound();
 
   const words = post.contentMarkdown.split(/\s+/).filter(Boolean).length;
