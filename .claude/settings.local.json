@@ -14,7 +14,10 @@
       "Bash(echo \"=== sizes per skill ===\" *)",
       "Bash(npx tsc *)",
       "Bash(npm run *)",
-      "Bash(curl -s -o /dev/null -w \"homepage HTTP %{http_code}\\\\n\" http://localhost:3000/)"
+      "Bash(curl -s -o /dev/null -w \"homepage HTTP %{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(PGPASSWORD=npg_kjAGnzWas6V1 /Library/PostgreSQL/17/bin/psql postgresql://neondb_owner:npg_kjAGnzWas6V1@ep-dawn-rain-aqnts0kr.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require)",
+      "Bash(PGPASSWORD=npg_kjAGnzWas6V1 /Library/PostgreSQL/17/bin/psql postgresql://neondb_owner:npg_kjAGnzWas6V1@ep-dawn-rain-aqnts0kr.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require -tA)",
+      "Bash(python3 -c ' *)"
     ],
     "additionalDirectories": [
       "/private/var/folders/ss/hbv0y1nx1hj05gpng3btxf680000gn/T/tmp.6P41cvYbB2"

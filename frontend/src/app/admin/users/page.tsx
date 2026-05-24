@@ -328,7 +328,12 @@ export default function AdminUsersPage() {
                         </span>
                         <div className="min-w-0">
                           <p className="flex items-center gap-2 truncate text-sm font-medium">
-                            {u.displayName}
+                            <Link
+                              href={`/admin/users/${u.id}`}
+                              className="truncate hover:text-[color:var(--primary)] hover:underline"
+                            >
+                              {u.displayName}
+                            </Link>
                             {u.role === "Admin" && (
                               <span className="rounded-full bg-[color:var(--accent-soft)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[color:var(--primary)]">
                                 Admin

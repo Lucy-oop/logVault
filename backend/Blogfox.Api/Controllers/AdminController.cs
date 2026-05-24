@@ -58,6 +58,45 @@ public record AdminReportItem(
     string PostStatus
 );
 
+public record AdminUserDetail(
+    Guid Id,
+    string Email,
+    string DisplayName,
+    string Role,
+    bool IsBanned,
+    DateTime CreatedAt,
+    DateTime? AcceptedRulesAt,
+    int PublishedPostCount,
+    int HiddenPostCount,
+    int DraftPostCount,
+    int CommentCount,
+    int TotalReactionsReceived,
+    int TotalViewsReceived,
+    int ReportsAgainstCount,
+    IReadOnlyList<AdminUserPostRow> Posts,
+    IReadOnlyList<AdminUserCommentRow> Comments
+);
+
+public record AdminUserPostRow(
+    Guid Id,
+    string Slug,
+    string Title,
+    string Status,
+    DateTime? PublishedAt,
+    int ViewCount,
+    int ReactionCount,
+    int CommentCount
+);
+
+public record AdminUserCommentRow(
+    Guid Id,
+    Guid PostId,
+    string PostSlug,
+    string PostTitle,
+    string Content,
+    DateTime CreatedAt
+);
+
 [ApiController]
 [Route("api/admin")]
 [Authorize(Roles = nameof(UserRole.Admin))]
@@ -237,6 +276,72 @@ public class AdminController : ControllerBase
             .ToListAsync();
 
         return Ok(users);
+    }
+
+    [HttpGet("users/{id:guid}")]
+    public async Task<ActionResult<AdminUserDetail>> UserDetail(Guid id)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == id);
+        if (user is null) return NotFound();
+
+        var postsRaw = await _db.Posts
+            .Where(p => p.AuthorId == id)
+            .OrderByDescending(p => p.PublishedAt ?? p.UpdatedAt)
+            .Select(p => new
+            {
+                p.Id, p.Slug, p.Title, p.Status, p.PublishedAt, p.ViewCount,
+                ReactionCount = _db.PostReactions.Count(r => r.PostId == p.Id),
+                CommentCount = _db.Comments.Count(c => c.PostId == p.Id && c.Status == CommentStatus.Approved),
+            })
+            .Take(100)
+            .ToListAsync();
+
+        var posts = postsRaw
+            .Select(p => new AdminUserPostRow(
+                p.Id, p.Slug, p.Title, p.Status.ToString(),
+                p.PublishedAt, p.ViewCount, p.ReactionCount, p.CommentCount))
+            .ToList();
+
+        var comments = await _db.Comments
+            .Where(c => c.AuthorId == id)
+            .OrderByDescending(c => c.CreatedAt)
+            .Select(c => new AdminUserCommentRow(
+                c.Id,
+                c.PostId,
+                c.Post.Slug,
+                c.Post.Title,
+                c.Content,
+                c.CreatedAt))
+            .Take(50)
+            .ToListAsync();
+
+        var totalReactions = await _db.PostReactions
+            .CountAsync(r => _db.Posts.Any(p => p.Id == r.PostId && p.AuthorId == id));
+        var totalViews = await _db.Posts.Where(p => p.AuthorId == id).SumAsync(p => (int?)p.ViewCount) ?? 0;
+        var reportsAgainst = await _db.Reports
+            .CountAsync(r => _db.Posts.Any(p => p.Id == r.PostId && p.AuthorId == id));
+
+        var publishedCount = posts.Count(p => p.Status == "Published");
+        var hiddenCount = posts.Count(p => p.Status == "Hidden");
+        var draftCount = posts.Count(p => p.Status == "Pending");
+
+        return Ok(new AdminUserDetail(
+            user.Id,
+            user.Email,
+            user.DisplayName,
+            user.Role.ToString(),
+            user.IsBanned,
+            user.CreatedAt,
+            user.AcceptedRulesAt,
+            publishedCount,
+            hiddenCount,
+            draftCount,
+            comments.Count,
+            totalReactions,
+            totalViews,
+            reportsAgainst,
+            posts,
+            comments));
     }
 
     [HttpPost("users/{id:guid}/ban")]

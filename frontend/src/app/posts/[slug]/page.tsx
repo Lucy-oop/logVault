@@ -15,6 +15,7 @@ import { AuthorByline } from "@/components/AuthorByline";
 import { OwnerActions } from "@/components/OwnerActions";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { ReportButton } from "@/components/ReportButton";
+import { AdminActions } from "@/components/AdminActions";
 import { TableOfContents } from "@/components/TableOfContents";
 import { extractToc } from "@/lib/toc";
 import { CodeBlock } from "@/components/CodeBlock";
@@ -73,7 +74,31 @@ export default async function PostPage({ params }: { params: { slug: string } })
       <TableOfContents items={toc} />
 
       <article className="mx-auto max-w-prose animate-fade-in">
-        <div className="flex items-center gap-3">
+        {post.status === "Hidden" && (
+          <div
+            role="alert"
+            className="mb-6 flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm"
+            style={{
+              borderColor: "color-mix(in srgb, var(--alarm) 35%, transparent)",
+              background: "color-mix(in srgb, var(--alarm) 8%, transparent)",
+              color: "var(--alarm)",
+            }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" className="mt-0.5 h-4 w-4 shrink-0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+              <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+              <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+              <line x1="2" y1="2" x2="22" y2="22" />
+            </svg>
+            <span>
+              <strong>This post is hidden.</strong> It's invisible on the public site. Only the
+              author and admins can read it. Restore it from the action bar above when you're
+              ready to make it public again.
+            </span>
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center gap-3">
           <Link
             href="/"
             className="group inline-flex items-center gap-1.5 text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--primary)] transition-colors hover:text-[color:var(--primary-hover)]"
@@ -88,6 +113,12 @@ export default async function PostPage({ params }: { params: { slug: string } })
             postSlug={post.slug}
             authorId={post.authorId}
             title={post.title}
+          />
+          <AdminActions
+            postId={post.id}
+            postTitle={post.title}
+            postStatus={post.status}
+            authorId={post.authorId}
           />
         </div>
 

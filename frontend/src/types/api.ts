@@ -117,6 +117,45 @@ export interface AdminUserItem {
   commentCount: number;
 }
 
+export interface AdminUserPostRow {
+  id: string;
+  slug: string;
+  title: string;
+  status: "Pending" | "Published" | "Hidden";
+  publishedAt: string | null;
+  viewCount: number;
+  reactionCount: number;
+  commentCount: number;
+}
+
+export interface AdminUserCommentRow {
+  id: string;
+  postId: string;
+  postSlug: string;
+  postTitle: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface AdminUserDetail {
+  id: string;
+  email: string;
+  displayName: string;
+  role: "Author" | "Admin";
+  isBanned: boolean;
+  createdAt: string;
+  acceptedRulesAt: string | null;
+  publishedPostCount: number;
+  hiddenPostCount: number;
+  draftPostCount: number;
+  commentCount: number;
+  totalReactionsReceived: number;
+  totalViewsReceived: number;
+  reportsAgainstCount: number;
+  posts: AdminUserPostRow[];
+  comments: AdminUserCommentRow[];
+}
+
 export interface AdminStats {
   totalUsers: number;
   bannedUsers: number;
