@@ -36,3 +36,6 @@ pnpm-debug.log*
 
 # Uploads (dev media storage)
 backend/Blogfox.Api/wwwroot/uploads/
+
+# Claude Code workspace settings — never commit (contains command history that may include secrets)
+.claude/
