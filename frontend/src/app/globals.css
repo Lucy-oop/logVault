@@ -1,0 +1,211 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- Tokens (light) ---------- */
+:root {
+  color-scheme: light;
+  --bg: #FAF7F2;
+  --surface: #FFFFFF;
+  --surface-2: #F0EBE0;
+  --border: #E2D9C8;
+  --text: #1F1410;
+  --text-muted: #756A5D;
+  --primary: #D97706;       /* Warm Amber */
+  --primary-hover: #B45309;
+  --accent: #FDECC8;
+  --accent-soft: #FEF8EC;
+  --alarm: #DC2626;
+  --ring: rgba(217, 119, 6, 0.45);
+}
+
+/* ---------- Tokens (dark — Editorial Black) ---------- */
+.dark {
+  color-scheme: dark;
+  --bg: #0B0B0C;
+  --surface: #161618;
+  --surface-2: #1F1F22;
+  --border: #2B2B2F;
+  --text: #F4F1EC;          /* Warm off-white */
+  --text-muted: #8B8680;
+  --primary: #E58F36;       /* Warmer amber, more visible on near-black */
+  --primary-hover: #F1A04A;
+  --accent: #3A2C18;
+  --accent-soft: #2A2014;
+  --alarm: #F87171;
+  --ring: rgba(229, 143, 54, 0.55);
+}
+
+/* ---------- Base ---------- */
+@layer base {
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    @apply text-fluid-base antialiased;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--ring);
+    border-radius: 6px;
+    transition: box-shadow 200ms ease;
+  }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--primary) 30%, transparent);
+    border-radius: 999px;
+    border: 2px solid var(--bg);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--primary) 55%, transparent);
+  }
+  * { scrollbar-color: color-mix(in srgb, var(--primary) 30%, transparent) transparent; scrollbar-width: thin; }
+
+  ::selection { background: color-mix(in srgb, var(--primary) 40%, transparent); color: var(--text); }
+}
+
+/* ---------- Utility tokens ---------- */
+@layer utilities {
+  .bg-surface     { background-color: var(--surface); }
+  .bg-surface-2   { background-color: var(--surface-2); }
+  .bg-primary     { background-color: var(--primary); }
+  .border-token   { border-color: var(--border); }
+  .text-muted     { color: var(--text-muted); }
+  .text-primary   { color: var(--primary); }
+  .text-alarm     { color: var(--alarm); }
+
+  /* Subtle focus: no amber glow; only a slightly darker border. */
+  .focus-quiet:focus-visible,
+  .focus-quiet:focus {
+    outline: none;
+    box-shadow: none;
+    border-color: color-mix(in srgb, var(--text) 35%, transparent);
+  }
+
+  /* Suggestion row hover: soft amber tint.
+     (Using color-mix because Tailwind's /opacity modifier doesn't
+      reliably apply alpha to arbitrary CSS-variable colors.) */
+  .row-hover {
+    transition: background-color 200ms ease;
+  }
+  .row-hover:hover {
+    background-color: color-mix(in srgb, var(--primary) 22%, transparent);
+  }
+  .row-hover.is-selected {
+    background-color: color-mix(in srgb, var(--primary) 30%, transparent);
+  }
+
+  /* Stagger fade-in for grid items */
+  .stagger > * {
+    opacity: 0;
+    animation: stagger-in 500ms ease-out forwards;
+  }
+  .stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger > *:nth-child(2) { animation-delay: 60ms; }
+  .stagger > *:nth-child(3) { animation-delay: 120ms; }
+  .stagger > *:nth-child(4) { animation-delay: 180ms; }
+  .stagger > *:nth-child(5) { animation-delay: 240ms; }
+  .stagger > *:nth-child(6) { animation-delay: 300ms; }
+  .stagger > *:nth-child(7) { animation-delay: 360ms; }
+  .stagger > *:nth-child(8) { animation-delay: 420ms; }
+  .stagger > *:nth-child(9) { animation-delay: 480ms; }
+  @keyframes stagger-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stagger > * { animation: none; opacity: 1; }
+  }
+
+  /* Heart burst (used on like-button click) */
+  .animate-heart-burst {
+    animation: heart-burst 700ms ease-out forwards;
+  }
+  @keyframes heart-burst {
+    0%   { opacity: 1; transform: translate(-50%, -50%)  scale(0.6); }
+    50%  { opacity: 1; transform: translate(-50%, -130%) scale(1.5); }
+    100% { opacity: 0; transform: translate(-50%, -210%) scale(1.9); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .animate-heart-burst { animation: none; opacity: 0; }
+  }
+
+  /* Hero carousel: active dot grows over the dwell time as a progress indicator */
+  @keyframes dot-grow {
+    from { width: 0.75rem; }
+    to   { width: 2.25rem; }
+  }
+  .dot-grow {
+    animation: dot-grow 4000ms linear forwards;
+  }
+  .carousel-paused .dot-grow {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .dot-grow {
+      animation: none;
+      width: 2.25rem;
+    }
+  }
+
+}
+
+/* ---------- Long-form post content ---------- */
+.prose-blog {
+  color: var(--text);
+  max-width: 72ch;
+  font-size: clamp(1.0625rem, 1rem + 0.4vw, 1.1875rem);
+  line-height: 1.78;
+}
+.prose-blog > * + * { margin-top: 1.1em; }
+
+/* Magazine-style drop cap on the first paragraph */
+.prose-blog > p:first-of-type::first-letter {
+  font-family: var(--font-display), Georgia, serif;
+  float: left;
+  font-size: 4.4em;
+  line-height: 0.85;
+  font-weight: 700;
+  padding: 0.05em 0.12em 0 0;
+  color: var(--primary);
+}
+
+.prose-blog h1 { @apply text-fluid-4xl font-display font-bold mt-10 mb-4; }
+.prose-blog h2 { @apply text-fluid-3xl font-display font-bold mt-10 mb-3; scroll-margin-top: 6rem; }
+.prose-blog h3 { @apply text-fluid-2xl font-display font-semibold mt-8 mb-2; scroll-margin-top: 6rem; }
+.prose-blog p { margin-bottom: 1.1em; }
+.prose-blog ul { @apply list-disc pl-6 mb-4 space-y-2; }
+.prose-blog ol { @apply list-decimal pl-6 mb-4 space-y-2; }
+.prose-blog a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+.prose-blog a:hover { color: var(--primary-hover); }
+.prose-blog code {
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--text);
+  padding: 0.15em 0.4em;
+  border-radius: 6px;
+  font-size: 0.9em;
+}
+.prose-blog pre {
+  background: #050505;
+  color: #F4F1EC;
+  padding: 1.1rem 1.25rem;
+  border-radius: 12px;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
+}
+.prose-blog pre code { background: transparent; color: inherit; padding: 0; }
+.prose-blog blockquote {
+  border-left: 4px solid var(--primary);
+  padding-left: 1rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 1.5rem 0;
+}
+.prose-blog img { border-radius: 12px; margin: 1.5rem 0; }
+.prose-blog hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }

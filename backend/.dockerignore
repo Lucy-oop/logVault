@@ -1,0 +1,18 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.idea/
+**/.vscode/
+
+# Never copy local dev secrets into the image
+**/appsettings.*.local.json
+**/appsettings.Development.json
+
+# User-uploaded images live in a volume, not the image
+**/wwwroot/uploads/
+
+# Source-control noise
+.git/
+.gitignore
+.dockerignore
+*.md

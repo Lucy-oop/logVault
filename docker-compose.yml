@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: blogfox-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: blogfox
+      POSTGRES_PASSWORD: blogfox_dev_password
+      POSTGRES_DB: blogfox
+    ports:
+      - "5432:5432"
+    volumes:
+      - blogfox_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U blogfox -d blogfox"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  blogfox_pgdata:
