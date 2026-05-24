@@ -1,0 +1,22 @@
+name: keep-render-warm
+
+# Pings the Render backend every 14 minutes so the free tier doesn't pause.
+# Render pauses after 15 min of zero traffic and takes 30-60s to cold-start.
+# At 14-min intervals this stays comfortably under that threshold and
+# keeps the API instant for visitors at any hour.
+
+on:
+  schedule:
+    - cron: "*/14 * * * *"   # every 14 minutes
+  workflow_dispatch:           # also runnable manually from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping API
+        run: |
+          curl --silent --show-error --max-time 60 --retry 2 --retry-delay 5 \
+            -o /dev/null \
+            -w "HTTP %{http_code} · %{time_total}s\n" \
+            https://logvault-api.onrender.com/api/posts
